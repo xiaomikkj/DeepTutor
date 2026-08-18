@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeepTutor</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: system-ui, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(160deg, #0f172a 0%, #1e293b 55%, #0f172a 100%);
+        color: #e2e8f0;
+      }
+      .card {
+        text-align: center;
+        max-width: 520px;
+        padding: 40px 32px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .logo {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 18px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 26px;
+        color: #fff;
+      }
+      h1 {
+        font-size: 22px;
+        margin-bottom: 8px;
+      }
+      .spinner {
+        width: 34px;
+        height: 34px;
+        margin: 22px auto 14px;
+        border: 3px solid rgba(255, 255, 255, 0.15);
+        border-top-color: #60a5fa;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      p {
+        font-size: 14px;
+        line-height: 1.7;
+        color: #94a3b8;
+      }
+      .hint {
+        display: none;
+        margin-top: 18px;
+        text-align: left;
+        font-size: 13px;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        padding: 12px 14px;
+        border-radius: 10px;
+        color: #fca5a5;
+      }
+      .hint code {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 1px 6px;
+        border-radius: 5px;
+        font-family: ui-monospace, Consolas, monospace;
+      }
+      button {
+        margin-top: 12px;
+        padding: 8px 18px;
+        border-radius: 8px;
+        border: none;
+        background: #3b82f6;
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #2563eb;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo">DT</div>
+      <h1>DeepTutor</h1>
+      <div class="spinner" id="spinner"></div>
+      <p id="status">正在启动 DeepTutor 本地服务…<br />首次启动需要构建前端，请稍候（最多 2 分钟）。</p>
+      <div class="hint" id="hint">
+        未检测到 DeepTutor 服务。请检查：
+        <br />• 已安装后端：<code>pip install deeptutor</code>
+        <br />• 手动启动：<code>deeptutor start</code>
+        <br />• 或设置 <code>DEEPTUTOR_URL</code> 环境变量指向已有服务后重启本应用。
+        <br /><button id="retry">重试连接</button>
+      </div>
+    </div>
+
+    <script>
+      // The Rust shell navigates the window once the server port is reachable.
+      // This page only tracks how long we have waited and shows help on timeout.
+      const HINT_AFTER_MS = 125 * 1000;
+      const target = document.getElementById("target");
+      setTimeout(() => {
+        document.getElementById("spinner").style.display = "none";
+        document.getElementById("hint").style.display = "block";
+        document.getElementById("status").style.display = "none";
+      }, HINT_AFTER_MS);
+      document.getElementById("retry").addEventListener("click", () => {
+        // Normal top-level navigation to the DeepTutor frontend; WebView2 will
+        // show its own connection error if the server is still down.
+        window.location.href = "http://localhost:3782";
+      });
+    </script>
+  </body>
+</html>

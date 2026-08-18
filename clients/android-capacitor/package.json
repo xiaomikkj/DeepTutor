@@ -1,0 +1,20 @@
+{
+  "name": "deeptutor-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DeepTutor Android client — Capacitor/WebView shell around the DeepTutor web app",
+  "scripts": {
+    "sync": "cap sync",
+    "add:android": "cap add android",
+    "open:android": "cap open android",
+    "build:android": "cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7",
+    "@capacitor/core": "^7"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7",
+    "typescript": "^5"
+  }
+}

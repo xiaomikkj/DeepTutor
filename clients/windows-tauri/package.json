@@ -1,0 +1,14 @@
+{
+  "name": "deeptutor-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DeepTutor Windows client — thin Tauri (WebView2) shell around the DeepTutor web app",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

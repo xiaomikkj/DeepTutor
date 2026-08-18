@@ -1,0 +1,8 @@
+node_modules/
+android/.gradle/
+android/app/build/
+android/build/
+android/capacitor-cordova-android-plugins/
+android/capacitor.settings.gradle
+android/local.properties
+dist/

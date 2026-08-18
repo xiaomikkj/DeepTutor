@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>DeepTutor</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: linear-gradient(170deg, #0f172a 0%, #1e293b 60%, #0f172a 100%);
+        color: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+        padding: 32px 24px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .logo {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 30px;
+        color: #fff;
+      }
+      h1 {
+        font-size: 22px;
+        margin-bottom: 6px;
+      }
+      .sub {
+        font-size: 13px;
+        color: #94a3b8;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+      .field {
+        text-align: left;
+        margin-bottom: 14px;
+      }
+      .field label {
+        display: block;
+        font-size: 13px;
+        color: #cbd5e1;
+        margin-bottom: 6px;
+      }
+      input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.07);
+        color: #f1f5f9;
+        font-size: 15px;
+        outline: none;
+      }
+      input:focus {
+        border-color: #60a5fa;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+      button {
+        flex: 1;
+        padding: 13px;
+        border-radius: 12px;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      #connect {
+        background: linear-gradient(135deg, #3b82f6, #6366f1);
+        color: #fff;
+      }
+      #connect:disabled {
+        opacity: 0.6;
+      }
+      #test {
+        background: rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+        flex: 0 0 auto;
+        padding: 13px 18px;
+      }
+      #status {
+        margin-top: 14px;
+        font-size: 13px;
+        min-height: 18px;
+        color: #fbbf24;
+      }
+      #status.ok {
+        color: #4ade80;
+      }
+      #status.err {
+        color: #f87171;
+      }
+      .hint {
+        margin-top: 18px;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.7;
+        text-align: left;
+      }
+      .hint code {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo">DT</div>
+      <h1>DeepTutor</h1>
+      <p class="sub">连接你的 DeepTutor 服务器</p>
+
+      <div class="field">
+        <label for="server">服务器地址（电脑上的 DeepTutor 前端地址）</label>
+        <input
+          id="server"
+          type="url"
+          inputmode="url"
+          autocomplete="url"
+          placeholder="http://192.168.1.100:3782"
+          spellcheck="false"
+        />
+      </div>
+
+      <div class="row">
+        <button id="connect">进入</button>
+        <button id="test">测试</button>
+      </div>
+      <div id="status"></div>
+
+      <div class="hint">
+        在电脑上运行 <code>deeptutor start</code> 后，把地址改成电脑的局域网 IP（如
+        <code>http://192.168.1.100:3782</code>），手机与电脑连同一 Wi-Fi 即可使用。
+        <br />在 DeepTutor 界面按返回键可回到本页更换服务器。麦克风用于语音输入（转文字）。
+      </div>
+    </div>
+
+    <script>
+      const SAVED_KEY = "deeptutor_server_url";
+      const input = document.getElementById("server");
+      const connectBtn = document.getElementById("connect");
+      const testBtn = document.getElementById("test");
+      const statusEl = document.getElementById("status");
+
+      function setStatus(text, kind) {
+        statusEl.textContent = text;
+        statusEl.className = kind ? kind : "";
+      }
+
+      function saved() {
+        try {
+          return localStorage.getItem(SAVED_KEY) || "";
+        } catch {
+          return "";
+        }
+      }
+
+      input.value = saved() || "";
+      if (!input.value) {
+        // Best-effort suggestion: guess the host used to load this page.
+        try {
+          const host = location.hostname;
+          if (host && host !== "localhost") {
+            input.value = "http://" + host + ":3782";
+          }
+        } catch {}
+      }
+
+      async function httpGet(url) {
+        // Prefer the native Capacitor HTTP client (bypasses CORS), fall back
+        // to fetch when this page is opened in a plain browser.
+        if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+          const res = await window.Capacitor.Plugins.CapacitorHttp.get({ url, readTimeout: 8000, connectTimeout: 8000 });
+          return res.status;
+        }
+        const res = await fetch(url, { method: "GET", mode: "no-cors" });
+        return res.status;
+      }
+
+      testBtn.addEventListener("click", async () => {
+        const url = input.value.trim().replace(/\/+$/, "");
+        if (!url) {
+          setStatus("请输入服务器地址", "err");
+          return;
+        }
+        testBtn.disabled = true;
+        setStatus("正在连接…");
+        try {
+          const status = await httpGet(url + "/");
+          setStatus("连接成功（HTTP " + status + "）", "ok");
+        } catch (e) {
+          setStatus("连接失败：无法访问该地址", "err");
+        } finally {
+          testBtn.disabled = false;
+        }
+      });
+
+      connectBtn.addEventListener("click", () => {
+        let url = input.value.trim().replace(/\/+$/, "");
+        if (!url) {
+          setStatus("请输入服务器地址", "err");
+          return;
+        }
+        if (!/^https?:\/\//i.test(url)) {
+          url = "http://" + url;
+        }
+        try {
+          localStorage.setItem(SAVED_KEY, url);
+        } catch {}
+        setStatus("正在打开 " + url + " …");
+        connectBtn.disabled = true;
+        // Navigate the WebView to the DeepTutor frontend. The frontend proxies
+        // /api and /ws to the backend on the same host, so everything is
+        // same-origin once we land there.
+        window.location.href = url;
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") connectBtn.click();
+      });
+    </script>
+  </body>
+</html>
