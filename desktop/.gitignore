@@ -1,0 +1,15 @@
+# Rust / Tauri
+target/
+src-tauri/gen/schemas/
+
+# Node
+node_modules/
+
+# Local config
+data/
+*.local.json
+
+# Editor
+.idea/
+.vscode/
+*.swp

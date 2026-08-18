@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DeepTutor — Connect</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="connect-card">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">DT</div>
+        <h1>DeepTutor</h1>
+        <p class="tagline">Lifelong personalized tutoring</p>
+      </div>
+
+      <form id="connect-form" autocomplete="off">
+        <label for="server-url">Server address</label>
+        <input
+          id="server-url"
+          name="server-url"
+          type="text"
+          spellcheck="false"
+          placeholder="https://tutor.example.com"
+          autofocus
+        />
+        <p id="error" class="error hidden" role="alert"></p>
+        <button id="connect-btn" type="submit">Connect</button>
+      </form>
+
+      <p class="hint">
+        Enter the address of your DeepTutor server. If none exists yet, start one
+        locally first and connect to its address.
+      </p>
+
+      <footer class="footer">
+        <span>DeepTutor desktop client</span>
+        <span id="version">v0.1.0</span>
+      </footer>
+    </main>
+
+    <script src="./main.js"></script>
+  </body>
+</html>

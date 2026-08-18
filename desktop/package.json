@@ -1,0 +1,14 @@
+{
+  "name": "deeptutor-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DeepTutor Windows desktop client (Tauri 2 shell)",
+  "scripts": {
+    "icons": "node ./scripts/gen-icons.mjs",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
