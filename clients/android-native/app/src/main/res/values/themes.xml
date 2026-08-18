@@ -1,0 +1,6 @@
+<resources>
+    <!-- Compose 渲染接管 UI；此主题仅用于启动瞬间，避免闪白屏。 -->
+    <style name="Theme.DeepTutor" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
+    </style>
+</resources>
