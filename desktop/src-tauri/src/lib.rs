@@ -16,6 +16,14 @@ use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Manager, Url, WebviewUrl, Window};
 
+#[cfg(windows)]
+use webview2_com::Microsoft::Web::WebView2::Win32::{
+    COREWEBVIEW2_PERMISSION_KIND, COREWEBVIEW2_PERMISSION_KIND_CAMERA,
+    COREWEBVIEW2_PERMISSION_KIND_MICROPHONE, COREWEBVIEW2_PERMISSION_STATE_ALLOW,
+};
+#[cfg(windows)]
+use webview2_com::PermissionRequestedEventHandler;
+
 const CONFIG_FILE: &str = "client.json";
 
 #[derive(Serialize, Deserialize, Default, Clone)]
@@ -137,6 +145,49 @@ fn show_main_window(app: &AppHandle) -> Result<(), String> {
     win.set_focus().map_err(|e| e.to_string())
 }
 
+/// Grant camera/microphone permission automatically on Windows.
+///
+/// WebView2 does not surface a permission prompt for media devices by
+/// default, so without a `PermissionRequested` handler `getUserMedia`
+/// always fails. We attach our own handler that auto-approves camera and
+/// microphone requests.
+#[cfg(windows)]
+fn grant_media_permissions(win: &tauri::WebviewWindow) -> tauri::Result<()> {
+    win.with_webview(|webview| {
+        let controller = webview.controller();
+        if let Ok(core) = unsafe { controller.CoreWebView2() } {
+            let mut token = 0i64;
+            let handler = PermissionRequestedEventHandler::create(Box::new(|_, args| {
+                let Some(args) = args else {
+                    return Ok(());
+                };
+                let mut kind = COREWEBVIEW2_PERMISSION_KIND::default();
+                unsafe {
+                    let _ = args.PermissionKind(&mut kind);
+                    if kind == COREWEBVIEW2_PERMISSION_KIND_MICROPHONE
+                        || kind == COREWEBVIEW2_PERMISSION_KIND_CAMERA
+                    {
+                        let _ = args.SetState(COREWEBVIEW2_PERMISSION_STATE_ALLOW);
+                    }
+                }
+                Ok(())
+            }));
+            unsafe {
+                let _ = core.add_PermissionRequested(&handler, &mut token);
+            }
+        }
+    })
+}
+
+/// Apply all permission / webview grants to the main window.
+#[cfg_attr(not(windows), allow(unused_variables))]
+fn grant_webview_permissions(app: &tauri::App) {
+    #[cfg(windows)]
+    if let Some(win) = app.get_webview_window("main") {
+        let _ = grant_media_permissions(&win);
+    }
+}
+
 fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
     let show_i = MenuItem::with_id(app, "show", "Show / Hide", true, None::<&str>)?;
     let settings_i = MenuItem::with_id(app, "settings", "Connection Settings", true, None::<&str>)?;
@@ -197,6 +248,7 @@ pub fn run() {
         .on_window_event(on_window_event)
         .setup(|app| {
             setup_tray(app)?;
+            grant_webview_permissions(app);
             Ok(())
         })
         .run(tauri::generate_context!())

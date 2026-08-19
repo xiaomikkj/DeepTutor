@@ -19,7 +19,8 @@
         "center": true,
         "resizable": true,
         "fullscreen": false,
-        "url": "index.html"
+        "url": "index.html",
+        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --unsafely-treat-insecure-origin-as-secure=*"
       }
     ],
     "security": {
